@@ -1,0 +1,16 @@
+{
+    "compilerOptions": {
+      "target": "ES2020",                         // Specify ECMAScript target version
+      "module": "commonjs",                       // Use CommonJS modules (used in Node.js)
+      "rootDir": "./backend",                     // The root directory for your source code
+      "outDir": "./dist",                         // Where to output the compiled JavaScript files
+      "strict": true,                             // Enable all strict type-checking options
+      "esModuleInterop": true,                    // Allow default imports from modules with no default export
+      "skipLibCheck": true,                       // Skip type checking for library files
+      "forceConsistentCasingInFileNames": true,   // Ensure consistent file casing
+      "resolveJsonModule": true                   // Allow importing .json files
+    },
+    "include": ["backend/**/*.ts"],                // Include all TypeScript files in the backend folder
+    "exclude": ["node_modules", "dist"]            // Exclude node_modules and dist from compilation
+  }
+  

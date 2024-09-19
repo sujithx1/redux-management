@@ -48,6 +48,12 @@ body {
     margin-left: 5px;
   }
   
+  .user_logout:hover{
+    cursor: pointer;
+
+
+  }
+  
   @media (max-width: 768px) {
     header {
       flex-direction: column;

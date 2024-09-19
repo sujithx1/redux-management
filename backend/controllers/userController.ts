@@ -4,6 +4,7 @@ import User, { TypeUser } from "../models/userModel";
 import bcrypt from "bcrypt";
 import { comparePass, HashPassword } from "../helpers/sequirePassword";
 import { Generatetoken } from "../JWT/jwt_token_auth";
+import {upload} from "../helpers/multer"
 
 class UserController {
   Getlogin = asyncHandler(
@@ -26,6 +27,11 @@ class UserController {
         res.status(400).json({ message: "email not registerd" });
         return;
       }
+      if (userData.Delete) {
+        res.status(400).json({message:'User Is Blocked'})
+        return  
+        
+      }
       const isMatch = await comparePass(password, userData.password);
       if (!isMatch) {
         res.status(400).json({ message: "password  not matched" });
@@ -34,10 +40,14 @@ class UserController {
 
       res.status(200).json({
         message: "Login Success...",
-        _id: userData.id,
+        image:userData.image,
+        mobile:userData.mobile,
+        id: userData.id,
         username: userData.username,
         email: userData.email,
         token: Generatetoken(userData.id),
+        profilepic:userData.image,
+        Delete:userData.Delete
       });
       return;
     }
@@ -59,7 +69,7 @@ class UserController {
         return;
       }
 
-      const hashedpassword = await HashPassword(password);
+      const hashedpassword:string = await HashPassword(password);
       console.log(hashedpassword);
 
       const insertUser = new User({
@@ -78,8 +88,10 @@ class UserController {
         _id: insertUser.id,
         username: insertUser.username,
         email: insertUser.email,
-
+        mobile:insertUser.mobile,
+        Delete:insertUser.Delete,
         token: token,
+
       });
     }
   );
@@ -87,6 +99,8 @@ class UserController {
   GetHome = asyncHandler(
     async (req: express.Request, res: express.Response) => {
       const userid=req.user?.id
+      console.log("home page");
+      
       if(!userid)
       {
         console.log(",fmdmn");
@@ -114,46 +128,46 @@ class UserController {
     }
   );
 
-  UpdateUser = asyncHandler(
-    async (req: express.Request, res: express.Response) => {
-      let { id } = req.query;
+  // UpdateUser = asyncHandler(
+  //   async (req: express.Request, res: express.Response) => {
+  //     let { id } = req.query;
 
-      const { username, mobile, email } = req.body;
-      // id = id.trim();
+  //     const { username, mobile, email } = req.body;
+  //     // id = id.trim();
 
-      if (!id) {
-        res.status(400).json({ message: "Id not defined" });
-        return;
-      }
-      console.log(id);
-      id = id.toString().trim();
+  //     if (!id) {
+  //       res.status(400).json({ message: "Id not defined" });
+  //       return;
+  //     }
+  //     console.log(id);
+  //     id = id.toString().trim();
 
-      if (!username || !mobile || !email) {
-        res.status(400).json({ message: "please enter something" });
-        return;
-      }
-      const user = await User.findByIdAndUpdate(
-        id,
-        {
-          username,
-          email,
-          mobile,
-        },
-        {
-          new: true,
-          runValidators: true,
-        }
-      );
-      if (!user) {
-        res
-          .status(400)
-          .json({ message: "User not found Updated something problem" });
-        return;
-      }
-      await user?.save();
-      res.status(200).json({ message: "Update User Success" });
-    }
-  );
+  //     if (!username || !mobile || !email) {
+  //       res.status(400).json({ message: "please enter something" });
+  //       return;
+  //     }
+  //     const user = await User.findByIdAndUpdate(
+  //       id,
+  //       {
+  //         username,
+  //         email,
+  //         mobile,
+  //       },
+  //       {
+  //         new: true,
+  //         runValidators: true,
+  //       }
+  //     );
+  //     if (!user) {
+  //       res
+  //         .status(400)
+  //         .json({ message: "User not found Updated something problem" });
+  //       return;
+  //     }
+  //     await user?.save();
+  //     res.status(200).json({ message: "Update User Success" });
+  //   }
+  // );
 
   Deleteuser = asyncHandler(
     async (req: express.Request, res: express.Response) => {
@@ -171,9 +185,78 @@ class UserController {
       res.status(200).json({ message: "delete User is Success", data: user });
     }
   );
-  //  Deleteuser=asyncHandler(async (req:express.Request,res:express.Response) => {
 
-  //  })
+   userLogout=asyncHandler(async (req:express.Request,res:express.Response) => {
+    
+    res.status(200).json({message:'Logout success...'})
+
+   })
+
+   
+
+
+
+   UpdateUser=asyncHandler(async (req:express.Request,res:express.Response) => {
+    console.log("upload user rendering...");
+    
+    
+    const{id,email,username,mobile,token}=req.body
+    console.log(id,email,username,mobile,token);
+    
+    const profilePic = req.file ? req.file.filename : null;
+    
+    console.log("profile",profilePic);
+    
+    if(!id)
+    {
+      console.log("ivalid id ");
+      
+      res.status(400).json({message:'invalid user'})
+      return
+    }
+    if( !email || !username || !mobile)
+    {
+      console.log("no email ... no username... no mobile..");
+      
+      res.status(400).json({message:'Enter something'})
+      return
+    }
+  
+    const userData=await User.findOne({_id:id})
+    if(!userData)
+    {
+      console.log("user not Found...");
+      
+      res.status(400).json({message:'User Not Found'})
+      return
+    }
+   
+    
+    userData.username=username
+    userData.email=email
+    userData.mobile=mobile
+    if (profilePic) {
+      userData.image = profilePic; 
+    }
+    userData.save()
+    res.status(200).json({message:'update userSuccess',user:userData,
+      profilePicUrl: `http://localhost:3001/uploads/${profilePic}`,
+      id:userData.id,
+      username:userData.username,
+      image:userData.image,
+      email:userData.email,
+      mobile:userData.mobile,
+      token:token,
+      Delete:userData.Delete
+    })
+
+ 
+    
+    
+   
+
+   })
+
 }
 
 export default new UserController();

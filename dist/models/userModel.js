@@ -25,6 +25,9 @@ const UserSchema = new mongoose_1.default.Schema({
     Delete: {
         type: Boolean,
         default: false
+    },
+    image: {
+        type: String
     }
 }, {
     timestamps: true

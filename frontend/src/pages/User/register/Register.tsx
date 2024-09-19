@@ -1,7 +1,12 @@
-import { ChangeEvent, FormEvent, useState } from "react"
+import { ChangeEvent, FormEvent, useEffect, useState } from "react"
 import {FaUser} from "react-icons/fa"
 
-
+import {useSelector,useDispatch} from 'react-redux'
+import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
+import {registerUser,reset } from "../../../features/auth/UserService";
+import { AppDispatch, RootState } from "../../../store/store";
+import Spinner from "../../../components/user/spinner/Spinner";
 import './register.css'
 // import Header from "../../components/user/Header/Header";
 
@@ -29,7 +34,21 @@ const Register = () => {
 
     const {username,email,mobile,password,password2}=formData
 
+      const navigate=useNavigate()
+      const dispatch:AppDispatch=useDispatch()
+      const {user,isLoading,isError,isSuccess,message}=useSelector((state:RootState)=>state.auth)
+      useEffect(()=>{
+        if(isError)
+        {
+          toast.error(message)
+        }
+        if (isSuccess || user) {
+          navigate('/login')
+          
+        }
+        dispatch(reset())
 
+      },[user,isError,isSuccess,message,navigate,dispatch])
     const onChange=(e:ChangeEvent<HTMLInputElement>)=>{
         setFormData((prevState)=>({
             ...prevState,
@@ -100,9 +119,21 @@ const Register = () => {
         e.preventDefault()
        if (validateForm()) {
         console.log("form data" ,formData);
+        const userData={
+          username,
+          email,
+          mobile,
+          password
+        }
+         dispatch(registerUser(userData))
         
        }
         
+    }
+
+    if(isLoading)
+    {
+      return<Spinner/>
     }
   return (
       <>

@@ -28,7 +28,7 @@ token = token.replace(/^"|"$/g, '');// this is not complicate its just removing 
 try {
     const decoded = jwt.verify(token, jwt_secret) as JwtPayload & { id: string };
 
- console.log("decodeeeeeeeeeeeeeeeeeeeee",decoded);
+ 
  
  if (typeof decoded === 'object' && 'id' in decoded) {
     req.user = await User.findById(decoded.id).select('-password');

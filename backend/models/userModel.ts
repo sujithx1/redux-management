@@ -1,12 +1,13 @@
 import mongoose,{Document,Schema} from "mongoose";
 
-export interface TypeUser extends Document{
+export interface TypeUser extends Document{     
 
     username:string;
     email:string;
     mobile:string;
     password:string | undefined;
-    Delete:boolean
+    Delete:boolean;
+    image:string
 }
 
 const UserSchema:Schema=new mongoose.Schema({
@@ -31,6 +32,10 @@ const UserSchema:Schema=new mongoose.Schema({
     Delete:{
         type:Boolean,
         default:false   
+    },
+    image:{
+        type:String
+    
     }
 },{
     timestamps:true

@@ -1,6 +1,15 @@
-import { ChangeEvent, FormEvent, useState } from "react"
+import { ChangeEvent, FormEvent, useEffect, useState } from "react"
 import {FaSignInAlt} from "react-icons/fa"
 import './login.css'
+import { useDispatch, useSelector } from "react-redux";
+import { AppDispatch, RootState } from "../../../store/store";
+import { toast } from "react-toastify";
+import { useNavigate } from "react-router-dom";
+import { reset, userLogin } from "../../../features/auth/UserService";
+import Spinner from "../../../components/user/spinner/Spinner";
+import 'react-toastify/dist/ReactToastify.css'; // Import this CSS file
+import Header from "../../../components/user/Header/Header";
+
 
 
 
@@ -16,6 +25,25 @@ interface FormDataType{
 
 
 const Login = () => {
+
+    // const [hasShownToast, setHasShownToast] = useState(false); // State to track toast display
+    const navigate=useNavigate()
+    const dispatch:AppDispatch=useDispatch()
+    const {user,isLoading,isError,isSuccess,message}=useSelector((state:RootState)=>state.auth)
+    useEffect(()=>{
+      if(isError)
+      {
+        toast.error(message)
+      }
+      if ((isSuccess )) {
+        toast.success("login completed")
+        
+        navigate('/',{replace:true})
+        
+      }
+      dispatch(reset())
+
+    },[user,isError,isSuccess,message,navigate,dispatch])
 
     const [formData,setFormData]=useState<FormDataType>({
       
@@ -85,12 +113,18 @@ const Login = () => {
         e.preventDefault()
        if (validateForm()) {
         console.log("form data" ,formData);
+        dispatch(userLogin(formData))
         
        }
         
     }
+    if(isLoading)
+        {
+          return<Spinner/>
+        }
   return (
       <>
+      <Header/> 
    <div className="login-container">
       <form className="login-form" onSubmit={SubmitBtn}>
         <h2>Login <FaSignInAlt/></h2>

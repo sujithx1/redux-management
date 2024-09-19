@@ -19,7 +19,6 @@ exports.Auth = (0, express_async_handler_1.default)(async (req, res, next) => {
     token = token.replace(/^"|"$/g, ''); // this is not complicate its just removing "(this one)
     try {
         const decoded = jsonwebtoken_1.default.verify(token, jwt_secret);
-        console.log("decodeeeeeeeeeeeeeeeeeeeee", decoded);
         if (typeof decoded === 'object' && 'id' in decoded) {
             req.user = await userModel_1.default.findById(decoded.id).select('-password');
             next();

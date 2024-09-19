@@ -1,0 +1,105 @@
+/* HomeAdmin.css */
+
+.admin-dashboard {
+    padding: 2rem;
+  }
+  
+  .dashboard-title {
+    font-size: 2rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  .table-container {
+    overflow-x: auto;
+  }
+  /* Centering the search input box */
+.search-container {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+/* Styling the search input field */
+.search-input {
+  padding: 10px;
+  width: 100%;
+  max-width: 400px; /* Adjust width to your preference */
+  border: 1px solid #ccc; /* Light gray border */
+  border-radius: 4px; /* Rounded corners */
+  font-size: 16px; /* Slightly larger text for readability */
+  outline: none; /* Removes blue outline on focus */
+  transition: box-shadow 0.3s ease; /* Smooth transition for shadow */
+}
+
+/* Adding focus effect for better UX */
+.search-input:focus {
+  box-shadow: 0 0 10px rgba(0, 123, 255, 0.5); /* Soft blue shadow */
+  border-color: #007bff; /* Change border color to blue on focus */
+}
+
+  
+  .users-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 1.5rem;
+  }
+  
+  .users-table th, 
+  .users-table td {
+    padding: 1rem;
+    border: 1px solid #ddd;
+    text-align: left;
+  }
+  
+  .users-table th {
+    background-color: #f4f4f4;
+  }
+  
+  .users-table tr:hover {
+    background-color: #f9f9f9;
+  }
+  
+  .user-avatar {
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+  }
+  
+  .block-btn {
+    background-color: #ff4d4f;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  .unblock-btn {
+    background-color: rgb(3, 166, 3);
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  
+  .block-btn:hover {
+    background-color: #e04141;
+  }
+  .unblock-btn:hover {
+    background-color: rgb(5, 202, 5);
+  }
+  
+  .edit-btn {
+    background-color: #1890ff;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-left: 0.5rem;
+  }
+  
+  .edit-btn:hover {
+    background-color: #0073e6;
+  }
+  

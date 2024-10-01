@@ -11,6 +11,7 @@ import HomeAdmin from "./pages/Admin/dashboard/HomeAdmin";
 import Userslist from "./pages/Admin/userlist/Userslist";
 import UserEditAdmin from "./pages/Admin/useredit/UserEditAdmin";
 import ProtectAdmin from "./components/admin/protect/ProtectAdmin";
+import NewUser from "./pages/Admin/newuser/NewUser";
 
 function App() {
   return (
@@ -27,7 +28,12 @@ function App() {
                 </Protected>
               }
             />
-            <Route path="/login" element={<Login />} />
+            <Route path="/login" element={
+             
+
+                <Login />
+             
+              } />
             <Route path="/register" element={<Register />} />
             <Route
               path="/profile"
@@ -49,12 +55,17 @@ function App() {
                 <Userslist/>
                 </ProtectAdmin>
                 } />
+                
             <Route path="/admin/user/edit" element={
               <ProtectAdmin>
 
                 <UserEditAdmin/>
               </ProtectAdmin>
               } />
+
+              <Route path="/admin/user/new" element={
+                <NewUser/>
+              }/>
           </Routes>
         </div>
       </Router>

@@ -12,4 +12,5 @@ AdminRoute.put('/block', adminController_1.default.setUserBlock);
 AdminRoute.put('/unblock', adminController_1.default.setUserUnBlock);
 AdminRoute.get('/edit/:userId', adminController_1.default.getEditUser);
 AdminRoute.put('/update', adminController_1.default.setEditUser);
+AdminRoute.post('/newuser', adminController_1.default.CreateNewUSer);
 exports.default = AdminRoute;

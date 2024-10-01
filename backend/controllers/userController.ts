@@ -3,8 +3,9 @@ import asyncHandler from "express-async-handler";
 import User, { TypeUser } from "../models/userModel";
 import bcrypt from "bcrypt";
 import { comparePass, HashPassword } from "../helpers/sequirePassword";
-import { Generatetoken } from "../JWT/jwt_token_auth";
-import {upload} from "../helpers/multer"
+
+import { upload } from "../helpers/multer";
+import { GenerateAccessToken, GenerateRefreshToken } from "../JWT/jwt_token_auth";
 
 class UserController {
   Getlogin = asyncHandler(
@@ -28,27 +29,34 @@ class UserController {
         return;
       }
       if (userData.Delete) {
-        res.status(400).json({message:'User Is Blocked'})
-        return  
-        
+        res.status(400).json({ message: "User Is Blocked" });
+        return;
       }
       const isMatch = await comparePass(password, userData.password);
       if (!isMatch) {
         res.status(400).json({ message: "password  not matched" });
         return;
       }
+      const accessToken = GenerateAccessToken(userData.id);
+      const refreshToken=GenerateRefreshToken(userData.id)
+      res
+        .cookie("refreshToken", refreshToken, {
+          httpOnly: true
+         
+        })
 
-      res.status(200).json({
-        message: "Login Success...",
-        image:userData.image,
-        mobile:userData.mobile,
-        id: userData.id,
-        username: userData.username,
-        email: userData.email,
-        token: Generatetoken(userData.id),
-        profilepic:userData.image,
-        Delete:userData.Delete
-      });
+        .status(200)
+        .json({
+          message: "Login Success...",
+          image: userData.image,
+          mobile: userData.mobile,
+          id: userData.id,
+          username: userData.username,
+          email: userData.email,
+          profilepic: userData.image,
+          Delete: userData.Delete,
+          token:accessToken
+        });
       return;
     }
   );
@@ -61,15 +69,16 @@ class UserController {
         res.status(400).json({ message: "please eneter field" });
         return;
       }
-      console.log(typeof password);
 
       const Existuser = await User.findOne({ email: email });
       if (Existuser) {
+        console.log("existing user");
+
         res.status(400).json({ message: "Email Already Register" });
-        return;
+        return; 
       }
 
-      const hashedpassword:string = await HashPassword(password);
+      const hashedpassword: string = await HashPassword(password);
       console.log(hashedpassword);
 
       const insertUser = new User({
@@ -80,39 +89,39 @@ class UserController {
       });
       await insertUser.save();
 
-      const token = Generatetoken(insertUser.id);
-
+    
       res.status(201).json({
         message: "signUp success",
 
         _id: insertUser.id,
         username: insertUser.username,
         email: insertUser.email,
-        mobile:insertUser.mobile,
-        Delete:insertUser.Delete,
-        token: token,
-
+        mobile: insertUser.mobile,
+        Delete: insertUser.Delete,
+       
       });
     }
   );
 
   GetHome = asyncHandler(
     async (req: express.Request, res: express.Response) => {
-      const userid=req.user?.id
+      const userid = req.user?.id;
       console.log("home page");
-      
-      if(!userid)
-      {
-        console.log(",fmdmn");
-        
-      }
-      const userData=await User.findById(userid)
 
-      res.status(200).json({ message: "Home page" ,
-        id:userData?._id,
-      username:userData?.username,
-    email:userData?.email,
-  mobile:userData?.mobile});
+      if (!userid) {
+        console.log(",fmdmn");
+      }
+      const userData = await User.findById(userid);
+
+      res
+        .status(200)
+        .json({
+          message: "Home page",
+          id: userData?._id,
+          username: userData?.username,
+          email: userData?.email,
+          mobile: userData?.mobile,
+        });
     }
   );
 
@@ -186,77 +195,70 @@ class UserController {
     }
   );
 
-   userLogout=asyncHandler(async (req:express.Request,res:express.Response) => {
-    
-    res.status(200).json({message:'Logout success...'})
-
-   })
-
-   
-
-
-
-   UpdateUser=asyncHandler(async (req:express.Request,res:express.Response) => {
-    console.log("upload user rendering...");
-    
-    
-    const{id,email,username,mobile,token}=req.body
-    console.log(id,email,username,mobile,token);
-    
-    const profilePic = req.file ? req.file.filename : null;
-    
-    console.log("profile",profilePic);
-    
-    if(!id)
-    {
-      console.log("ivalid id ");
-      
-      res.status(400).json({message:'invalid user'})
-      return
+  userLogout = asyncHandler(
+    async (req: express.Request, res: express.Response) => {
+      res.clearCookie('refreshToken')
+     .status(200).json({ message: "Logout success..." });
     }
-    if( !email || !username || !mobile)
-    {
-      console.log("no email ... no username... no mobile..");
-      
-      res.status(400).json({message:'Enter something'})
-      return
-    }
-  
-    const userData=await User.findOne({_id:id})
-    if(!userData)
-    {
-      console.log("user not Found...");
-      
-      res.status(400).json({message:'User Not Found'})
-      return
-    }
-   
-    
-    userData.username=username
-    userData.email=email
-    userData.mobile=mobile
-    if (profilePic) {
-      userData.image = profilePic; 
-    }
-    userData.save()
-    res.status(200).json({message:'update userSuccess',user:userData,
-      profilePicUrl: `http://localhost:3001/uploads/${profilePic}`,
-      id:userData.id,
-      username:userData.username,
-      image:userData.image,
-      email:userData.email,
-      mobile:userData.mobile,
-      token:token,
-      Delete:userData.Delete
-    })
+  );
 
- 
-    
-    
-   
+  UpdateUser = asyncHandler(
+    async (req: express.Request, res: express.Response) => {
+     
+      console.log("upload user rendering...");
 
-   })
+      const { id, email, username, mobile, token } = req.body;
+      console.log(id, email, username, mobile, token);
+     
 
+      const profilePic = req.file ? req.file.filename : null;
+
+      console.log("profile", profilePic);
+
+      if (!id) {
+        console.log("ivalid id ");
+
+        res.status(400).json({ message: "invalid user" });
+        return;
+      }
+      if (!email || !username || !mobile) {
+        console.log("no email ... no username... no mobile..");
+
+        res.status(400).json({ message: "Enter something" });
+        return;
+      }
+
+      const userData = await User.findOne({ _id: id });
+      if (!userData) {
+        console.log("user not Found...");
+
+        res.status(400).json({ message: "User Not Found" });
+        return;
+      }
+
+      userData.username = username;
+      userData.email = email;
+      userData.mobile = mobile;
+      if (profilePic) {
+        userData.image = profilePic;
+      }
+      userData.save();
+      res
+        .status(200)
+        .json({
+          message: "update userSuccess",
+          user: userData,
+          profilePicUrl: `http://localhost:3001/uploads/${profilePic}`,
+          id: userData.id,
+          username: userData.username,
+          image: userData.image,
+          email: userData.email,
+          mobile: userData.mobile,
+          token: token,
+          Delete: userData.Delete,
+        });
+    }
+  );
 }
 
 export default new UserController();

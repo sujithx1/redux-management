@@ -8,6 +8,7 @@ AdminRoute.put('/block',adminController.setUserBlock)
 AdminRoute.put('/unblock',adminController.setUserUnBlock)
 AdminRoute.get('/edit/:userId',adminController.getEditUser)
 AdminRoute.put('/update',adminController.setEditUser)
+AdminRoute.post('/newuser',adminController.CreateNewUSer)
 
 
 

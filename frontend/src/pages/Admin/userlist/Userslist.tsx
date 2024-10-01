@@ -2,7 +2,7 @@ import {  useEffect, useState } from "react"
 import Headeradmin from "../../../components/admin/header/Headeradmin"
 import { useDispatch, useSelector } from "react-redux"
 import { AppDispatch, RootState } from "../../../store/store"
-import { BlockUser, getAllusers, getUserEdit, UnblockUser, UserTypes } from "../../../features/auth/AdminService"
+import { adminreset, BlockUser, getAllusers, getUserEdit, UnblockUser, UserTypes } from "../../../features/auth/AdminService"
 // import Spinner from "../../../components/user/spinner/Spinner"
 import './userlistsadmin.css'
 import { useNavigate } from "react-router-dom"
@@ -26,6 +26,7 @@ const Userslist = () => {
      dispatch(getAllusers())
      .unwrap()
      .then((res)=>{console.log("fetch users",res);
+      dispatch(adminreset())
      })
      .catch((err)=>{console.log("fetch err",err);
      })

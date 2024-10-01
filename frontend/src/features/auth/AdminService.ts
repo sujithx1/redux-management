@@ -16,6 +16,12 @@ interface UserEditTypes{
     mobile:string;
     
 }
+interface NewUSer{
+    username:string;
+    email:string;
+    mobile:string;
+    password:string;
+}
 
 
 interface AdminLogin{
@@ -196,6 +202,49 @@ export const  adminLogin=createAsyncThunk<AdminType,AdminLogin,{rejectValue: str
     }
     
  })
+
+ export const CreateNewUSer=createAsyncThunk('/admin/user/create',async (newuser:NewUSer,{rejectWithValue}) => {
+
+    try {
+
+
+        const response=await axios.post(`${Admin_URL}/newuser`,newuser,{
+            headers:{
+                'Content-Type':'application/json'
+            }
+
+        })
+        if (response.data) {
+
+            return response.data
+            
+        }
+
+        
+    } catch (err) {
+        
+        const error=err as AxiosError
+        interface ErrorResponseData {
+            message: string;
+        }
+        let message: string;
+      
+if (error.response && error.response.data) {
+    const data = error.response.data as ErrorResponseData;
+    
+    message = data.message || 'An unknown error occurred';
+  } else {
+    message = error.message || error.toString();
+  }
+    
+return rejectWithValue(message);
+        
+    }
+
+
+    
+ })
+
  const admin = localStorage.getItem('admin') ? JSON.parse(localStorage.getItem('admin') as string) : null;
 
 
@@ -359,6 +408,23 @@ export const adminSlice=createSlice({
             state.message=action.payload as string
         })
 
+        .addCase(CreateNewUSer.pending,(state)=>{
+            state.isLoading=true;
+
+        })
+        .addCase(CreateNewUSer.fulfilled,(state,action)=>{
+            console.log("new user created from admin  ",action.payload.user);
+            
+            state.isLoading=false;
+            state.isSuccess=true;
+
+            state.users.push(action.payload.user)
+        })
+        .addCase(CreateNewUSer.rejected,(state,action)=>{
+            state.isSuccess=false;
+            state.isError=true;
+            state.message=action.payload as string
+        })
         
     }
 

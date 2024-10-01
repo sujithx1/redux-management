@@ -6,7 +6,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_async_handler_1 = __importDefault(require("express-async-handler"));
 const sequirePassword_1 = require("../helpers/sequirePassword");
 const adminModel_1 = __importDefault(require("../models/adminModel"));
-const jwt_token_auth_1 = require("../JWT/jwt_token_auth");
+// import { Generatetoken } from "../JWT/jwt_token_auth"
 const userModel_1 = __importDefault(require("../models/userModel"));
 class AdminController {
     constructor() {
@@ -28,22 +28,16 @@ class AdminController {
                 res.status(400).json({ message: "password  not matched" });
                 return;
             }
-            // const hashPassword=await HashPassword(password)
-            // const adminData=new Admin({
-            //     username,
-            //     password:hashPassword
-            // })
-            //  await adminData.save()
-            //  const token=Generatetoken(adminData.id)
             res.status(201).json({
                 message: 'login Success',
                 id: adminData.id,
                 username: adminData.username,
-                token: (0, jwt_token_auth_1.Generatetoken)(adminData.id)
+                // token:Generatetoken(adminData.id)
             });
         });
         this.getallUsers = (0, express_async_handler_1.default)(async (req, res) => {
-            const users = await userModel_1.default.find();
+            const users = await userModel_1.default.find().select('-password');
+            console.log(users);
             res.status(200).json({ message: 'success fetch all users', users: users });
         });
         this.setUserBlock = (0, express_async_handler_1.default)(async (req, res) => {
@@ -114,6 +108,30 @@ class AdminController {
                 return;
             }
             res.status(200).json({ message: 'user Update success', userData });
+        });
+        this.CreateNewUSer = (0, express_async_handler_1.default)(async (req, res) => {
+            console.log(req.body);
+            const { username, email, mobile, password } = req.body;
+            if (!username || !email || !mobile || !password) {
+                res.status(401).json({ message: 'Invalide Datas' });
+                return;
+            }
+            const existingemail = await userModel_1.default.findOne({ email: email });
+            if (existingemail) {
+                res.status(401).json({ message: 'Email already exist' });
+                return;
+            }
+            const hashpass = await (0, sequirePassword_1.HashPassword)(password);
+            const newuser = new userModel_1.default({ username,
+                email,
+                mobile,
+                password: hashpass
+            });
+            await newuser.save();
+            res.status(201).json({
+                message: 'new user Created',
+                user: newuser
+            });
         });
         // getallUsers=AsyncHandler(async (req:Request,res:Response) => {
         // })

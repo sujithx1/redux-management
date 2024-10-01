@@ -2,29 +2,33 @@ import express,{Application,request as req,response  as res } from 'express';
 import dotenv from 'dotenv';
 import colors from 'colors';
 import mongoose from 'mongoose'
-import { errorHandler } from './middleware/errorMiddleware';
+// import { errorHandler } from './middleware/errorMiddleware';
 import UserRouter from './routes/userRoutes';
 import AdminRoute from './routes/AdminRoute';
 import cors from 'cors'
 import path from 'path';
+import morgan from 'morgan';
+import cookieParser from 'cookie-parser'
 dotenv.config()
 const app:Application=express()
 
 
-app.use(cors());
 
+app.use(morgan('dev'))
+app.use(cookieParser())
 app.use(express.json())
 app.use(express.urlencoded({extended:false}))
 app.use(express.static('uploads'))
 // app.use(express.static(path.join(__dirname,'uploads')))
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-// const corsOptions = {
-//   origin: 'http://localhost:5173', 
-//   methods: ['GET', 'POST', 'PUT', 'DELETE'],
-//   credentials: true,
-// };
+const corsOptions = {
+  origin: 'http://localhost:5173', 
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  credentials: true,
+};
 
+app.use(cors(corsOptions));
 const mongoUrl:string=process.env.MONGO_URI || "";
 mongoose
   .connect(mongoUrl)
@@ -32,7 +36,7 @@ mongoose
   .catch((error) => console.log(colors.red(`MongoDB Connection Error: ${error}`)));
 app.use('/api/auth',UserRouter)
 app.use('/api/admin',AdminRoute) 
-app.use(errorHandler)
+// app.use(errorHandler)
 
 
 const port=process.env.PORT || 3003

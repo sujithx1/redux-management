@@ -1,0 +1,68 @@
+styles.css
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    
+  }
+  
+  header {
+    display: flex;
+    justify-content: space-between;
+    
+    align-items: center;
+    background-color: #333;
+    padding: 10px 20px;
+    color: #fff;
+  }
+  
+  .logo a {
+    color: #fff;
+    text-decoration: none;
+    font-size: 24px;
+    font-weight: bold;
+  }
+  
+  ul {
+    list-style: none;
+    display: flex;
+    gap: 20px;
+  }
+  
+  ul li {
+    display: inline;
+  }
+  
+  ul li a {
+    color: #fff;
+    text-decoration: none;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+  }
+  
+  ul li a:hover {
+    color: #f0a500;
+  }
+  
+  ul li a svg {
+    margin-left: 5px;
+  }
+  
+  .user_logout:hover{
+    cursor: pointer;
+
+
+  }
+  
+  @media (max-width: 768px) {
+    header {
+      flex-direction: column;
+      text-align: center;
+    }
+  
+    ul {
+      flex-direction: column;
+      gap: 10px;
+    }
+  }
+  

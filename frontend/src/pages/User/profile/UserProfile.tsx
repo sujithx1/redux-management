@@ -6,6 +6,8 @@
   import {   setUser, updateUser } from '../../../features/auth/UserService';
 import Header from '../../../components/user/Header/Header';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
+
 
 
   interface Profile_User_Type{
@@ -43,6 +45,8 @@ useEffect(()=>{
 const profilepicurl=user?.image?`http://localhost:3001/uploads/${user.image}`
 :"https://via.placeholder.com/150"
 console.log("profile pic =" ,user?.image);
+console.log("profile user tokennnn",user?.token)
+
 
 
     const [userData,setUserData]=useState<Profile_User_Type>({
@@ -51,9 +55,11 @@ console.log("profile pic =" ,user?.image);
       mobile:user?.mobile||"",
       image: null,
       id:user?.id||"",
-      token:user?.token || ""
-
+      token:user?.token||""
+       
     })
+    
+    console.log("toeknnn from user profilww",userData.token);
     
 
     console.log(user)
@@ -100,6 +106,35 @@ console.log("profile pic =" ,user?.image);
     }
     
     
+
+
+    const handleValidation=():boolean=>{
+      let isValid=true
+     if (username.trim()==="") {
+      toast.error("Username required")
+      isValid=false
+      
+      
+    }
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailPattern.test(email)) {
+    
+    toast.error("Invalid email")
+    isValid=false
+    
+  }
+    if (mobile.length ==0 || mobile.length <10  || mobile.length>10 ) {
+       toast.error("Invalid mobile")
+       isValid=false
+
+      
+     }
+
+
+     return isValid
+
+
+    }
     const handleSubmitBtn=async(e:FormEvent)=>{
       e.preventDefault()
       const updatedUserData = {
@@ -108,11 +143,14 @@ console.log("profile pic =" ,user?.image);
       };
       console.log("Updated user data:", updatedUserData);
       console.log("user",userData);
-      const result=await dispatch(updateUser(updatedUserData))
-      if(result)
-      {
-        navigate('/')
-      
+      if (handleValidation()) {
+        
+        const result=await dispatch(updateUser(updatedUserData))
+        if(result)
+        {
+          navigate('/')
+        
+        }
       }
 
       
@@ -179,7 +217,7 @@ console.log("profile pic =" ,user?.image);
         />
       </div>
       <div>
-        <button onClick={handleSubmitBtn}>submit</button>
+      <button className="submit-btn" onClick={handleSubmitBtn}>Submit</button>
       </div>
     </div>
   </div>

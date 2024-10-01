@@ -2,6 +2,8 @@ import axios, { AxiosError } from "axios";
 // import { IntialStateType, UserType } from "./authSlice";
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 
+import Cookies from 'universal-cookie';
+const cookies = new Cookies();
 
 
 export interface UserType{
@@ -45,40 +47,49 @@ export const registerUser=createAsyncThunk(
     'user/registerUser',
 
 
-async (userData:UserType) => {
+async (userData:UserType,thunkAPI) => {
     console.log("User Data ",userData);
+    try {
+        const response=await axios.post(`${API_URL}/register`,userData,{
+            headers: {
+                'Content-Type': 'application/json',
+              },
+              
+        })
+        
+        if(response.data)
+        {
+            localStorage.setItem('user',JSON.stringify(response.data))
     
-    const response=await axios.post(`${API_URL}/register`,userData,{
-        headers: {
-            'Content-Type': 'application/json',
-          },
-          
-    })
+        }
     
-    if(response.data)
-    {
-        localStorage.setItem('user',JSON.stringify(response.data))
-
+        return response.data
+        
+    } catch (err) {
+        const error = err as AxiosError;
+        interface ErrorResponseData {
+            message: string;
+        }
+        let message: string;
+      
+if (error.response && error.response.data) {
+    const data = error.response.data as ErrorResponseData;
+    
+    message = data.message || 'An unknown error occurred';
+  } else {
+    message = error.message || error.toString();
+  }
+    
+return thunkAPI.rejectWithValue(message);
+        
     }
-
-    return response.data
+    
 })
 
 export const userLogout=createAsyncThunk('user/logout',async (_,thunkAPI) => {
     try {
-        const token = localStorage.getItem('user') 
-        ? JSON.parse(localStorage.getItem('user') as string).token 
-        : null;
-
-    if (!token) {
-        throw new Error("No token found");
-    }
-
-    await axios.post(`${API_URL}/logout`, {}, {
-        headers: {
-            Authorization: `Bearer ${token}`,
-        },
-    });
+      
+    await axios.post(`${API_URL}/logout`, {},);
 
     localStorage.removeItem('user');
   
@@ -139,7 +150,10 @@ export const updateUser=createAsyncThunk('user/profile',async(userData:Updateuse
     formdata.append('id',userData.id)
     console.log("user id ",userData.id);
     
-    formdata.append('token',userData.token || "")
+    // formdata.append('token',userData.token || "")
+    const token=cookies.get('userToken')
+    console.log("tokennnnnnnnnnc fromm update user",token);
+    
     if (userData.image) {
         formdata.append('image',userData.image)
         
@@ -150,8 +164,9 @@ export const updateUser=createAsyncThunk('user/profile',async(userData:Updateuse
 
     const response=await axios.put(`${API_URL}/updateUser`,formdata,{
         headers:{
+            Authorization: `Bearer ${token}`,
             'Content-Type': 'multipart/form-data',
-        }
+          }
 
     })
     if(response.data)
@@ -225,11 +240,12 @@ export const authSlice=createSlice({
             state.user=null
         })
         .addCase(userLogout.fulfilled,(state)=>{
-            state.user=null
-            state.isSuccess=false
-            state.isError=false
+            state.user=null;
+            state.isSuccess=false;
+            state.isError=false;
             state.isLoading=false;
-            state.message='Logout success'
+            state.message='Logout success';
+            cookies.remove('userToken')
 
         })
         .addCase(userLogout.rejected, (state, action) => {
@@ -243,6 +259,8 @@ export const authSlice=createSlice({
             state.isLoading=false;
             state.isSuccess=true;
             state.user=action.payload
+            cookies.set('userToken',action.payload.token,{path:'/',maxAge:7 * 24 * 60 * 60})
+
         })
         .addCase(userLogin.rejected,(state,action)=>{
             state.isSuccess=false;

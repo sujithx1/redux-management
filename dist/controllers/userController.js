@@ -24,7 +24,7 @@ class UserController {
                 return;
             }
             if (userData.Delete) {
-                res.status(400).json({ message: 'User Is Blocked' });
+                res.status(400).json({ message: "User Is Blocked" });
                 return;
             }
             const isMatch = await (0, sequirePassword_1.comparePass)(password, userData.password);
@@ -32,16 +32,23 @@ class UserController {
                 res.status(400).json({ message: "password  not matched" });
                 return;
             }
-            res.status(200).json({
+            const accessToken = (0, jwt_token_auth_1.GenerateAccessToken)(userData.id);
+            const refreshToken = (0, jwt_token_auth_1.GenerateRefreshToken)(userData.id);
+            res
+                .cookie("refreshToken", refreshToken, {
+                httpOnly: true
+            })
+                .status(200)
+                .json({
                 message: "Login Success...",
                 image: userData.image,
                 mobile: userData.mobile,
                 id: userData.id,
                 username: userData.username,
                 email: userData.email,
-                token: (0, jwt_token_auth_1.Generatetoken)(userData.id),
                 profilepic: userData.image,
-                Delete: userData.Delete
+                Delete: userData.Delete,
+                token: accessToken
             });
             return;
         });
@@ -51,9 +58,9 @@ class UserController {
                 res.status(400).json({ message: "please eneter field" });
                 return;
             }
-            console.log(typeof password);
             const Existuser = await userModel_1.default.findOne({ email: email });
             if (Existuser) {
+                console.log("existing user");
                 res.status(400).json({ message: "Email Already Register" });
                 return;
             }
@@ -66,7 +73,6 @@ class UserController {
                 password: hashedpassword,
             });
             await insertUser.save();
-            const token = (0, jwt_token_auth_1.Generatetoken)(insertUser.id);
             res.status(201).json({
                 message: "signUp success",
                 _id: insertUser.id,
@@ -74,7 +80,6 @@ class UserController {
                 email: insertUser.email,
                 mobile: insertUser.mobile,
                 Delete: insertUser.Delete,
-                token: token,
             });
         });
         this.GetHome = (0, express_async_handler_1.default)(async (req, res) => {
@@ -84,11 +89,15 @@ class UserController {
                 console.log(",fmdmn");
             }
             const userData = await userModel_1.default.findById(userid);
-            res.status(200).json({ message: "Home page",
+            res
+                .status(200)
+                .json({
+                message: "Home page",
                 id: userData?._id,
                 username: userData?.username,
                 email: userData?.email,
-                mobile: userData?.mobile });
+                mobile: userData?.mobile,
+            });
         });
         this.GetUpdateUser = (0, express_async_handler_1.default)(async (req, res) => {
             const { id } = req.body;
@@ -151,7 +160,8 @@ class UserController {
             res.status(200).json({ message: "delete User is Success", data: user });
         });
         this.userLogout = (0, express_async_handler_1.default)(async (req, res) => {
-            res.status(200).json({ message: 'Logout success...' });
+            res.clearCookie('refreshToken')
+                .status(200).json({ message: "Logout success..." });
         });
         this.UpdateUser = (0, express_async_handler_1.default)(async (req, res) => {
             console.log("upload user rendering...");
@@ -161,18 +171,18 @@ class UserController {
             console.log("profile", profilePic);
             if (!id) {
                 console.log("ivalid id ");
-                res.status(400).json({ message: 'invalid user' });
+                res.status(400).json({ message: "invalid user" });
                 return;
             }
             if (!email || !username || !mobile) {
                 console.log("no email ... no username... no mobile..");
-                res.status(400).json({ message: 'Enter something' });
+                res.status(400).json({ message: "Enter something" });
                 return;
             }
             const userData = await userModel_1.default.findOne({ _id: id });
             if (!userData) {
                 console.log("user not Found...");
-                res.status(400).json({ message: 'User Not Found' });
+                res.status(400).json({ message: "User Not Found" });
                 return;
             }
             userData.username = username;
@@ -182,7 +192,11 @@ class UserController {
                 userData.image = profilePic;
             }
             userData.save();
-            res.status(200).json({ message: 'update userSuccess', user: userData,
+            res
+                .status(200)
+                .json({
+                message: "update userSuccess",
+                user: userData,
                 profilePicUrl: `http://localhost:3001/uploads/${profilePic}`,
                 id: userData.id,
                 username: userData.username,
@@ -190,7 +204,7 @@ class UserController {
                 email: userData.email,
                 mobile: userData.mobile,
                 token: token,
-                Delete: userData.Delete
+                Delete: userData.Delete,
             });
         });
     }

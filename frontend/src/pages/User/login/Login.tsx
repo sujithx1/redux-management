@@ -13,6 +13,7 @@ import Header from "../../../components/user/Header/Header";
 
 
 
+
 interface FormDataType{
    
     email:string;
@@ -31,24 +32,39 @@ const Login = () => {
     const dispatch:AppDispatch=useDispatch()
     const {user,isLoading,isError,isSuccess,message}=useSelector((state:RootState)=>state.auth)
     useEffect(()=>{
+   
       if(isError)
       {
         toast.error(message)
+        dispatch(reset())
+        return
       }
-      if ((isSuccess )) {
-        toast.success("login completed")
+     
         
-        navigate('/',{replace:true})
+        if (user && isSuccess) {
+       
+            toast.success("login completed")
+            navigate('/',{replace:true})
+
+
+
+            window.history.pushState(null, '', window.location.href);
+
+            // Listen for browser back button
+            window.onpopstate = () => {
+              window.history.pushState(null, '', window.location.href);
+            };
         
-      }
-      dispatch(reset())
+          dispatch(reset())
+        }
+      
 
     },[user,isError,isSuccess,message,navigate,dispatch])
 
     const [formData,setFormData]=useState<FormDataType>({
       
         email:'',
-        
+    
         password:'',
        
     })

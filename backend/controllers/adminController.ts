@@ -2,8 +2,16 @@ import AsyncHandler from "express-async-handler"
 import { Request,Response } from "express"
 import { comparePass, HashPassword } from "../helpers/sequirePassword"
 import Admin from "../models/adminModel"
-import { Generatetoken } from "../JWT/jwt_token_auth"
+// import { Generatetoken } from "../JWT/jwt_token_auth"
 import User from "../models/userModel"
+interface UserType{
+  _id:string;
+  username:string;
+  email:string;
+  Delete:boolean;
+  mobile:string;
+  image?  :string;
+}
 
 class AdminController{
     adminlogin=AsyncHandler(async (req:Request,res:Response) => {
@@ -30,28 +38,29 @@ class AdminController{
         }
   
         
-        // const hashPassword=await HashPassword(password)
-        // const adminData=new Admin({
-        //     username,
-        //     password:hashPassword
-        // })
-        //  await adminData.save()
-        //  const token=Generatetoken(adminData.id)
+        
          res.status(201).json({
             message:'login Success',
             id:adminData.id,
             username:adminData.username,
-            token:Generatetoken(adminData.id)
+            // token:Generatetoken(adminData.id)
          })
 
         
     })
     getallUsers=AsyncHandler(async (req:Request,res:Response) => {
-        const users= await User.find()
+        const users=await User.find().select('-password');
+
+        
+       
+        console.log(users);
+        
         
         res.status(200).json({message:'success fetch all users',users:users})
         
     })
+
+
     setUserBlock=AsyncHandler(async (req:Request,res:Response) => {
       console.log("block user rendering...");
       
@@ -67,8 +76,9 @@ class AdminController{
         userId,
         {$set:{Delete:true}},
         {new:true})
+
       if (userData) {
-        
+             
         res.status(200).json({message :'user Blocked Success',userId:userData._id})
         return
       }
@@ -154,6 +164,41 @@ class AdminController{
       res.status(200).json({message:'user Update success',userData})
 
       
+        
+    })
+    CreateNewUSer=AsyncHandler(async (req:Request,res:Response) => {
+
+console.log(req.body);
+
+      const{username,email,mobile,password}=req.body
+
+      if (!username || !email || !mobile || !password) {
+        res.status(401).json({message:'Invalide Datas'})
+        return
+        
+      }
+      const existingemail=await User.findOne({email:email})
+      if (existingemail) {
+        res.status(401).json({message:'Email already exist'})
+        return
+        
+      }
+      const hashpass= await HashPassword(password)
+      const newuser=new User(
+       { username,
+        email,
+        mobile,
+        password:hashpass
+}
+      
+      )
+      await newuser.save()
+    
+      res.status(201).json({
+        message:'new user Created',
+        user:newuser
+      })
+
         
     })
     // getallUsers=AsyncHandler(async (req:Request,res:Response) => {

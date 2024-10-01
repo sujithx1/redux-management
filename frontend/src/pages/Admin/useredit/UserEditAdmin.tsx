@@ -5,6 +5,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "../../../store/store";
 import { useNavigate } from "react-router-dom";
 import { UpdateEditUser } from "../../../features/auth/AdminService";
+import { toast } from "react-toastify";
 
 interface UserEditFromAdmin{
     username:string;
@@ -12,6 +13,11 @@ interface UserEditFromAdmin{
     mobile:string;
     _id:string;
 
+}
+interface ErrorUserEditTypes{
+  username:string;
+  email:string;
+  mobile:string;
 }
 const UserEditAdmin = () => {
     const navigate=useNavigate()
@@ -43,7 +49,14 @@ const UserEditAdmin = () => {
         
       }, [user]);
 
-     
+
+      // const [err,setErr]=useState<ErrorUserEditTypes>({
+      //   username:"",
+      //   email:"",
+      //   mobile:""
+      // })
+
+      
       
     
     const handleOnchange=(e:ChangeEvent<HTMLInputElement>)=>{
@@ -59,15 +72,57 @@ const UserEditAdmin = () => {
 
 const {username,email,mobile}=formdata
 
+const handleValidation=():boolean=>{
+  let isValid=true
+  const newError:ErrorUserEditTypes={
+    username:'',
+    email:'',
+    mobile:''
+  }
+  if (username.trim()=="") {
+    newError.username="username required"
+    toast.error(newError.username)
+
+    isValid=false
+
+    
+  }
+  const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailPattern.test(email)) {
+    newError.email="Invalid Email"
+    toast.error(newError.email)
+    isValid=false
+    
+  }
+ 
+  if (mobile.length ==0 || mobile.length <10  || mobile.length>10 ) {
+    newError.mobile="Invalid mobile"
+    toast.error(newError.mobile)
+
+    isValid=false
+    
+  }
+  
+  
+
+  return isValid
+
+}
+
+
+
     const handleUpdateUser= async(e:FormEvent,formdata:UserEditFromAdmin)=>{
       e.preventDefault()
       console.log("form data from handleUodateuser",formdata);
       
-       const result=await dispatch(UpdateEditUser(formdata))
-       if (result) {
-        navigate('/admin/users')
-         
-       }
+      if (handleValidation()) {
+        
+        const result=await dispatch(UpdateEditUser(formdata))
+        if (result) {
+         navigate('/admin/users')
+          
+        }
+      }
         
         
 
@@ -93,6 +148,7 @@ const {username,email,mobile}=formdata
               placeholder="Enter Username" 
               
             />
+            
           </div>
 
           <div className="form-group">

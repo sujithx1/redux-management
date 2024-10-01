@@ -18,7 +18,7 @@ const ProtectAdmin:FC<ProtectedRoutes> = ({children}) => {
     
         
     }
-  return  children
+  return  <>{children}</>
 }
 
 export default ProtectAdmin

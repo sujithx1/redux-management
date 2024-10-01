@@ -10,6 +10,7 @@ const Headeradmin = () => {
 
     const dispatch=useDispatch<AppDispatch>()
 
+    
 
     const handleLogout=()=>{
         dispatch(clearAdmin())
@@ -29,6 +30,9 @@ const Headeradmin = () => {
       <nav className="nav-admin">
         <button className="nav-btn" onClick={() => navigate('/admin/users')}>
           Users
+        </button>
+        <button className="nav-btn" onClick={() => navigate('/admin/user/new')}>
+          New User
         </button>
 
        

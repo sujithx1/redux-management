@@ -4,11 +4,18 @@ import './dashbord.css'
 import Header from "../../../components/user/Header/Header";
 
 
+
+
 const Dashboard = () => {
   console.log("dashboard rendint");
 
 
+
   const {user}=useSelector((state:RootState)=>state.auth)
+
+
+
+
   console.log("dashboard user",user);
   
 
